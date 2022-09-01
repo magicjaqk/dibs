@@ -70,6 +70,70 @@ export const giveawayItemRouter = createRouter()
       });
     },
   })
+  .mutation("update", {
+    input: z.object({
+      name: z.string(),
+      id: z.string(),
+    }),
+    async resolve({ ctx, input }) {
+      const user = await ctx.prisma.user.findUnique({
+        where: {
+          email: ctx.session?.user?.email!,
+        },
+      });
+
+      if (!user?.admin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message:
+            "You are not permitted to perform this action. Please contact an admin to do this for you.",
+        });
+      }
+
+      return await ctx.prisma.giveawayItem.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          name: input.name,
+        },
+      });
+    },
+  })
+  .mutation("remove", {
+    input: z.object({
+      id: z.string(),
+    }),
+    async resolve({ ctx, input }) {
+      const user = await ctx.prisma.user.findUnique({
+        where: {
+          email: ctx.session?.user?.email!,
+        },
+      });
+
+      if (!user?.admin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message:
+            "You are not permitted to perform this action. Please contact an admin to do this for you.",
+        });
+      }
+
+      return await ctx.prisma.giveawayItem
+        .delete({
+          where: {
+            id: input.id,
+          },
+        })
+        .then(async (item) => {
+          if (item.image.includes("/")) {
+            const imagePath = item.image.slice(item.image.indexOf("images"));
+
+            await supabase.storage.from("images").remove([imagePath]);
+          }
+        });
+    },
+  })
   .mutation("dibs", {
     input: z.object({
       id: z.string(),
