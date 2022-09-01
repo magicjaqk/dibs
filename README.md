@@ -1,3 +1,3 @@
-# Create T3 App
+# Dibs
 
-This is an app bootstrapped according to the [init.tips](https://init.tips) stack, also known as the T3-Stack.
+Dibs is an app that allows people to put things up for grabs by friends and family.
