@@ -25,6 +25,20 @@ export const giveawayItemRouter = createRouter()
       });
     },
   })
+  .query("getDibsed", {
+    async resolve({ ctx }) {
+      return await ctx.prisma.giveawayItem.findMany({
+        where: {
+          NOT: {
+            dibsByUser: null,
+          },
+        },
+        include: {
+          dibsByUser: true,
+        },
+      });
+    },
+  })
   // MIDDLEWARE
   .middleware(async ({ ctx, next }) => {
     // Any queries or mutations after this middleware will

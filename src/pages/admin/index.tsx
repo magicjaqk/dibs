@@ -13,6 +13,8 @@ const Admin = (props: Props) => {
 
   const addItem = trpc.useMutation(["giveawayItem.add"]);
 
+  if (!user.data && !user.error) return <div>Loading...</div>;
+
   if (!user.data?.admin) return <div>403: Forbidden Request.</div>;
 
   const handleSubmit = async (e: ChangeEvent<HTMLFormElement>) => {
