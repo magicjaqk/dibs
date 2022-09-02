@@ -10,73 +10,20 @@ import {
 } from "@react-spring/web";
 import SignInButton from "../components/SignInButton";
 import React from "react";
+import { trpc } from "../utils/trpc";
+import { useRouter } from "next/router";
+import AnimatedTitle from "../components/AnimatedTitle";
 
 const Home: NextPage = () => {
-  // const { data, status } = useSession();
-  // const user = trpc.useQuery(["auth.getSession"]);
   const [animationComplete, setAnimationComplete] = React.useState(false);
 
-  const callSpringRef = useSpringRef();
-  const callSpring = useSpring({
-    from: {
-      y: -100,
-      opacity: 0,
-    },
-    to: {
-      y: 0,
-      opacity: 1,
-    },
-    ref: callSpringRef,
-    config: { mass: 2, tension: 800, friction: 50 },
-  });
+  const user = trpc.useQuery(["auth.getSession"]);
+  const router = useRouter();
 
-  const dibsSpringRef = useSpringRef();
-  const dibsSpring = useSpring({
-    from: {
-      rotateZ: -45,
-      opacity: 0,
-      scale: 2.5,
-    },
-    to: {
-      rotateZ: 0,
-      opacity: 1,
-      scale: 1,
-    },
-    ref: dibsSpringRef,
-    config: { mass: 2, tension: 800, friction: 40 },
-  });
-
-  const onSpringRef = useSpringRef();
-  const onSpring = useSpring({
-    from: {
-      x: -30,
-      opacity: 0,
-    },
-    to: {
-      x: 0,
-      opacity: 1,
-    },
-    ref: onSpringRef,
-    config: { mass: 2, tension: 900, friction: 50 },
-  });
-
-  const stuffSpringRef = useSpringRef();
-  const stuffSpring = useSpring({
-    from: {
-      rotateZ: -90,
-      x: -10,
-      y: -80,
-      opacity: 0,
-    },
-    to: {
-      rotateZ: 0,
-      x: 0,
-      y: 0,
-      opacity: 1,
-    },
-    ref: stuffSpringRef,
-    config: { mass: 2, tension: 900, friction: 35 },
-  });
+  // If signed in, push to respective pages.
+  if (user.data?.user) {
+    router.push(user.data.admin ? "/admin" : "/stuff");
+  }
 
   // const exploreSpringRef = useSpringRef();
   const exploreSpring = useSpring({
@@ -92,17 +39,6 @@ const Home: NextPage = () => {
     onRest: () => setAnimationComplete(true),
   });
 
-  useChain(
-    [
-      callSpringRef,
-      dibsSpringRef,
-      onSpringRef,
-      stuffSpringRef,
-      // exploreSpringRef,
-    ],
-    [0, 0.2, 0.4, 0.6, 1]
-  );
-
   return (
     <>
       <Head>
@@ -115,22 +51,7 @@ const Home: NextPage = () => {
       </Head>
 
       <div className="w-screen min-h-screen flex flex-col justify-center items-center p-4 overflow-hidden relative">
-        <div className="text-4xl sm:text-6xl font-bold flex space-x-2.5 sm:space-x-3">
-          <a.h1 style={callSpring}>Call</a.h1>
-          <a.h1
-            style={dibsSpring}
-            className="bg-gradient-to-r from-emerald-500 to-sky-500 bg-clip-text text-transparent font-extrabold"
-          >
-            Dibs
-          </a.h1>
-          <a.h1 style={onSpring}>on</a.h1>
-          <a.h1
-            style={stuffSpring}
-            className="bg-gradient-to-r from-emerald-500 to-sky-500 bg-clip-text text-transparent font-extrabold"
-          >
-            Stuff
-          </a.h1>
-        </div>
+        <AnimatedTitle wordArray={["Call", "Dibs", "on", "Stuff"]} />
 
         <a.div
           style={exploreSpring}
