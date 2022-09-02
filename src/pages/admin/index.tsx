@@ -23,8 +23,9 @@ const Admin = (props: Props) => {
   const [itemName, setItemName] = React.useState("");
   const [imageFile, setImageFile] = React.useState<{
     file: File | null;
+    fileURL: string;
     fileName: string;
-  }>({ file: null, fileName: "" });
+  }>({ file: null, fileURL: "", fileName: "" });
   const [isLoading, setIsLoading] = React.useState(false);
   const [isSuccessful, setIsSuccessful] = React.useState(false);
 
@@ -79,7 +80,7 @@ const Admin = (props: Props) => {
         },
         {
           onSuccess: async () => {
-            setImageFile({ file: null, fileName: "" });
+            setImageFile({ file: null, fileURL: "", fileName: "" });
             setItemName("");
             setIsLoading(false);
 
@@ -163,7 +164,7 @@ const Admin = (props: Props) => {
                     <Image
                       layout="fill"
                       objectFit="cover"
-                      src={URL.createObjectURL(imageFile.file)}
+                      src={imageFile.fileURL}
                       alt="Preview image."
                     />
                   </div>
@@ -178,6 +179,7 @@ const Admin = (props: Props) => {
                 if (e.target.files && e.target.files[0])
                   setImageFile({
                     file: e.target.files[0],
+                    fileURL: URL.createObjectURL(e.target.files[0]),
                     fileName: e.target.value,
                   });
               }}
