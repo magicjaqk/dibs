@@ -80,7 +80,7 @@ const AnimatedTitle = (props: Props) => {
   useChain(
     [callSpringRef, dibsSpringRef, onSpringRef, stuffSpringRef],
     [0.5, 0.7, 0.9, 1.1],
-    500
+    1000
   );
 
   return (
