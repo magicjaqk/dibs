@@ -8,7 +8,8 @@ import SuccessfulToast from "../SuccessfulToast";
 
 type Inputs = {
   name: string;
-  image: string;
+  images: FileList | string[];
+  description: string;
 };
 
 type Props = {};
@@ -21,72 +22,92 @@ const UploadForm = (props: Props) => {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<Inputs>();
+  } = useForm<Inputs>({
+    defaultValues: {
+      description: "",
+      images: [],
+      name: "",
+    },
+  });
 
   const [isLoading, setIsLoading] = React.useState(false);
   const [isSuccessful, setIsSuccessful] = React.useState(false);
-  const [previewImgURL, setPreviewImgURL] = React.useState("");
+  const [previewImgURLs, setPreviewImgURLs] = React.useState<string[]>([]);
   const addItem = trpc.useMutation(["giveawayItem.add"]);
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setIsLoading(true);
 
-    const file = data.image[0];
-    console.log("Photo: ", file);
+    let supabaseImgPaths: string[] = [];
 
-    if (!file || !data.name) {
+    const files = data.images;
+    console.log("Photos: ", files);
+
+    if (!files || !data.name) {
       setIsLoading(false);
       return null;
     }
 
-    // @ts-ignore
-    const fileType = file.type.split("/")[1];
-    console.log(fileType);
+    for (let i = 0; i < files.length; i++) {
+      let file = files[i];
 
-    if (!fileType) return console.error("File has no type!");
+      if (!file) break;
 
-    const {
-      data: { randomID },
-    } = await axios.get("/api/randomId");
+      console.log(file);
 
-    const uniqueFileName = `${randomID as string}.${fileType}`;
+      // @ts-ignore
+      const fileType = file.type.split("/")[1];
+      console.log(fileType);
 
-    try {
-      const { data: supabaseData, error: supabaseError } =
-        await supabase.storage.from("images").upload(uniqueFileName, file);
-      if (supabaseError) throw supabaseError;
+      if (!fileType) return console.error("File has no type!");
 
-      addItem.mutate(
-        {
-          name: data.name,
-          imageFilePath: supabaseData.path,
-        },
-        {
-          onSuccess: async () => {
-            // Reset form values
-            reset({
-              image: "",
-              name: "",
-            });
-            setPreviewImgURL("");
+      const {
+        data: { randomID },
+      } = await axios.get("/api/randomId");
 
-            // Stop loading state
-            setIsLoading(false);
+      const uniqueFileName = `${randomID as string}.${fileType}`;
 
-            // Show successful toast for 3 seconds
-            setIsSuccessful(true);
-            await sleep(3000);
-            setIsSuccessful(false);
-          },
-          onError: (err) => {
-            setIsLoading(false);
-            throw err;
-          },
-        }
-      );
-    } catch (err) {
-      console.error(err);
+      try {
+        const { data: supabaseData, error: supabaseError } =
+          await supabase.storage.from("images").upload(uniqueFileName, file);
+        if (supabaseError) throw supabaseError;
+
+        supabaseImgPaths.push(supabaseData.path);
+      } catch (err) {
+        console.error(err);
+      }
     }
+
+    addItem.mutate(
+      {
+        name: data.name,
+        imageFilePaths: supabaseImgPaths,
+        description: data.description,
+      },
+      {
+        onSuccess: async () => {
+          // Reset form values
+          reset({
+            images: [],
+            name: "",
+            description: "",
+          });
+          setPreviewImgURLs([]);
+
+          // Stop loading state
+          setIsLoading(false);
+
+          // Show successful toast for 3 seconds
+          setIsSuccessful(true);
+          await sleep(3000);
+          setIsSuccessful(false);
+        },
+        onError: (err) => {
+          setIsLoading(false);
+          throw err;
+        },
+      }
+    );
     setIsLoading(false);
   };
 
@@ -108,16 +129,16 @@ const UploadForm = (props: Props) => {
         <label htmlFor="photo" className="relative mt-4 group">
           <div className="w-full h-64 rounded-3xl overflow-hidden bg-gradient-to-r from-emerald-600/50 to-sky-600/50 flex items-center justify-center hover:cursor-pointer relative">
             <div className="group-hover:scale-110 group-active:scale-100 rounded-full bg-white w-40 h-12 font-bold text-sky-700 shadow-md flex items-center justify-center transition-all z-10">
-              {previewImgURL ? "Change Photo" : "Upload a Photo"}
+              {previewImgURLs ? "Change Photo" : "Upload a Photo"}
             </div>
 
-            {previewImgURL && (
+            {previewImgURLs[0] && (
               <div className="absolute inset-0 w-full h-full">
                 <div className="relative w-full h-full">
                   <Image
                     layout="fill"
                     objectFit="cover"
-                    src={previewImgURL}
+                    src={previewImgURLs[0]}
                     alt="Preview image."
                   />
                 </div>
@@ -126,21 +147,37 @@ const UploadForm = (props: Props) => {
           </div>
           <input
             type="file"
+            multiple
             accept="image/jpeg image/png"
-            {...register("image", {
+            {...register("images", {
               onChange: (e) => {
-                console.log(e);
-                setPreviewImgURL(
-                  e.target?.files[0]
-                    ? URL.createObjectURL(e.target?.files[0])
-                    : ""
-                );
+                const files: FileList = e.target.files;
+
+                let previewURLs: string[] = [];
+                for (let i = 0; i < files.length; i++) {
+                  if (files[i]) {
+                    previewURLs.push(URL.createObjectURL(files[i]!));
+                  }
+                }
+
+                setPreviewImgURLs(previewURLs);
               },
             })}
             id="photo"
             className="file:hidden absolute bottom-4 left-4 text-sky-800 font-bold hover:cursor-pointer"
           />
         </label>
+
+        <label className="mt-4" htmlFor="description">
+          How would you describe this item?
+        </label>
+        <textarea
+          className="border rounded p-2"
+          {...register("description")}
+          id="description"
+          placeholder="A large mound of steaming hot poop."
+          rows={4}
+        />
 
         <button
           type="submit"

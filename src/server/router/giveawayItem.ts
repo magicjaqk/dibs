@@ -52,7 +52,8 @@ export const giveawayItemRouter = createRouter()
   .mutation("add", {
     input: z.object({
       name: z.string(),
-      imageFilePath: z.string(),
+      imageFilePaths: z.array(z.string()),
+      description: z.string(),
       id: z.optional(z.string()),
     }),
     async resolve({ ctx, input }) {
@@ -70,16 +71,27 @@ export const giveawayItemRouter = createRouter()
         });
       }
 
-      const {
-        data: { publicUrl: imagePublicURL },
-      } = await supabase.storage
-        .from("images")
-        .getPublicUrl(input.imageFilePath);
+      const getPublicURLS = async () => {
+        let urls: string[] = [];
+
+        input.imageFilePaths.forEach(async (imageFilePath) => {
+          const {
+            data: { publicUrl: imagePublicURL },
+          } = await supabase.storage.from("images").getPublicUrl(imageFilePath);
+
+          urls.push(imagePublicURL);
+        });
+
+        return urls;
+      };
+
+      const imagePublicURLs = await getPublicURLS();
 
       return await ctx.prisma.giveawayItem.create({
         data: {
           name: input.name,
-          image: imagePublicURL,
+          images: imagePublicURLs,
+          description: input.description,
         },
       });
     },
@@ -87,6 +99,7 @@ export const giveawayItemRouter = createRouter()
   .mutation("update", {
     input: z.object({
       name: z.string(),
+      description: z.string(),
       id: z.string(),
     }),
     async resolve({ ctx, input }) {
@@ -110,6 +123,7 @@ export const giveawayItemRouter = createRouter()
         },
         data: {
           name: input.name,
+          description: input.description,
         },
       });
     },
@@ -140,10 +154,12 @@ export const giveawayItemRouter = createRouter()
           },
         })
         .then(async (item) => {
-          if (item.image.includes("/")) {
-            const imagePath = item.image.slice(item.image.indexOf("images"));
+          for (const image in item.images) {
+            if (image.includes("/")) {
+              const imagePath = image.slice(image.indexOf("images"));
 
-            await supabase.storage.from("images").remove([imagePath]);
+              await supabase.storage.from("images").remove([imagePath]);
+            }
           }
         });
     },

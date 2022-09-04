@@ -11,11 +11,12 @@ datasource db {
 }
 
 model GiveawayItem {
-  id              String  @id @default(cuid())
+  id              String   @id @default(cuid())
   name            String
-  image           String
+  images          String[]
+  description     String
   dibsByUserEmail String?
-  dibsByUser      User?   @relation(fields: [dibsByUserEmail], references: [email])
+  dibsByUser      User?    @relation(fields: [dibsByUserEmail], references: [email])
 }
 
 // Necessary for Next auth
