@@ -1,29 +1,22 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import {
-  a,
-  useSpring,
-  config,
-  useSpringRef,
-  useChain,
-  useTransition,
-} from "@react-spring/web";
+import { a, useSpring, config } from "@react-spring/web";
 import SignInButton from "../components/SignInButton";
 import React from "react";
-import { trpc } from "../utils/trpc";
-import { useRouter } from "next/router";
+// import { trpc } from "../utils/trpc";
+// import { useRouter } from "next/router";
 import AnimatedTitle from "../components/AnimatedTitle";
 
 const Home: NextPage = () => {
   const [animationComplete, setAnimationComplete] = React.useState(false);
 
-  const user = trpc.useQuery(["auth.getSession"]);
-  const router = useRouter();
+  // const user = trpc.useQuery(["auth.getSession"]);
+  // const router = useRouter();
 
   // If signed in, push to respective pages.
-  if (user.data?.user) {
-    router.push(user.data.admin ? "/admin" : "/stuff");
-  }
+  // if (user.data?.user) {
+  //   router.push(user.data.admin ? "/admin" : "/stuff");
+  // }
 
   // const exploreSpringRef = useSpringRef();
   const exploreSpring = useSpring({

@@ -1,20 +1,11 @@
 import React from "react";
-import {
-  a,
-  useSpring,
-  useSpringRef,
-  useChain,
-  config,
-} from "@react-spring/web";
+import { a, useSpring, useSpringRef, useChain } from "@react-spring/web";
 
 type Props = {
   wordArray: [string, string, string, string];
 };
 
 const AnimatedTitle = (props: Props) => {
-  /**
-   * TITLE ANIMATION
-   */
   const callSpringRef = useSpringRef();
   const callSpring = useSpring({
     from: {
@@ -79,8 +70,8 @@ const AnimatedTitle = (props: Props) => {
 
   useChain(
     [callSpringRef, dibsSpringRef, onSpringRef, stuffSpringRef],
-    [0.5, 0.7, 0.9, 1.1],
-    1000
+    [0.5, 0.7, 0.9, 1.1]
+    // 1000
   );
 
   return (

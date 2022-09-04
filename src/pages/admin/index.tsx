@@ -3,34 +3,17 @@ import Head from "next/head";
 import React, { ChangeEvent } from "react";
 import { supabase } from "../../utils/supabase";
 import { trpc } from "../../utils/trpc";
-import {
-  a,
-  useSpring,
-  useSpringRef,
-  useChain,
-  config,
-} from "@react-spring/web";
+import { a, useSpring, config } from "@react-spring/web";
 import Link from "next/link";
-import Image from "next/image";
-import SuccessfulToast from "../../components/SuccessfulToast";
 import AnimatedTitle from "../../components/AnimatedTitle";
+import UploadForm from "../../components/admin/UploadForm";
 
 type Props = {};
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const Admin = (props: Props) => {
-  const [itemName, setItemName] = React.useState("");
-  const [imageFile, setImageFile] = React.useState<{
-    file: File | null;
-    fileURL: string;
-    fileName: string;
-  }>({ file: null, fileURL: "", fileName: "" });
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [isSuccessful, setIsSuccessful] = React.useState(false);
-
   const user = trpc.useQuery(["auth.getSession"]);
-  const addItem = trpc.useMutation(["giveawayItem.add"]);
 
   /**
    * LOADING ANIMATION
@@ -41,64 +24,6 @@ const Admin = (props: Props) => {
     loop: true,
     config: config.wobbly,
   });
-
-  /**
-   * SUBMIT FORM LOGIC
-   */
-  const handleSubmit = async (e: ChangeEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    const formData = new FormData(e.target);
-    const file = formData.get("photo");
-    console.log("Photo: ", file);
-
-    if (!file || !itemName) {
-      return null;
-    }
-
-    // @ts-ignore
-    const fileType = file.type.split("/")[1];
-
-    if (!fileType) return console.error("File has no type!");
-
-    const {
-      data: { randomID },
-    } = await axios.get("/api/randomId");
-
-    const uniqueFileName = `${randomID as string}.${fileType}`;
-
-    try {
-      const { data: supabaseData, error: supabaseError } =
-        await supabase.storage.from("images").upload(uniqueFileName, file);
-      if (supabaseError) throw supabaseError;
-
-      addItem.mutate(
-        {
-          name: itemName,
-          imageFilePath: supabaseData.path,
-        },
-        {
-          onSuccess: async () => {
-            setImageFile({ file: null, fileURL: "", fileName: "" });
-            setItemName("");
-            setIsLoading(false);
-
-            setIsSuccessful(true);
-            await sleep(3000);
-            setIsSuccessful(false);
-          },
-          onError: (err) => {
-            setIsLoading(false);
-            throw err;
-          },
-        }
-      );
-    } catch (err) {
-      console.error(err);
-    }
-    setIsLoading(false);
-  };
 
   /**
    * RENDER
@@ -137,87 +62,7 @@ const Admin = (props: Props) => {
       <div className="w-screen min-h-screen flex flex-col justify-center items-center p-4 overflow-hidden relative">
         <AnimatedTitle wordArray={["Get", "Rid", "of", "Shit"]} />
 
-        <form
-          onSubmit={handleSubmit}
-          className="w-full max-w-lg flex flex-col p-4"
-        >
-          <label htmlFor="name">What is this item?</label>
-          <input
-            type="text"
-            name="name"
-            id="name"
-            value={itemName}
-            onChange={(e) => setItemName(e.target.value)}
-            placeholder="Moldy underwear, cocaine, day-old bread, etc."
-            className="border rounded p-1"
-          />
-
-          <label htmlFor="photo" className="relative mt-4 group">
-            <div className="w-full h-64 rounded-3xl overflow-hidden bg-gradient-to-r from-emerald-600/50 to-sky-600/50 flex items-center justify-center hover:cursor-pointer relative">
-              <div className="group-hover:scale-110 group-active:scale-100 rounded-full bg-white w-40 h-12 font-bold text-sky-700 shadow-md flex items-center justify-center transition-all z-10">
-                {imageFile ? "Change Photo" : "Upload a Photo"}
-              </div>
-
-              {imageFile && imageFile.file && (
-                <div className="absolute inset-0 w-full h-full">
-                  <div className="relative w-full h-full">
-                    <Image
-                      layout="fill"
-                      objectFit="cover"
-                      src={imageFile.fileURL}
-                      alt="Preview image."
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-            <input
-              type="file"
-              accept="image/jpeg image/png"
-              value={imageFile?.fileName}
-              onChange={(e) => {
-                if (e.target.files && e.target.files[0])
-                  setImageFile({
-                    file: e.target.files[0],
-                    fileURL: URL.createObjectURL(e.target.files[0]),
-                    fileName: e.target.value,
-                  });
-              }}
-              name="photo"
-              id="photo"
-              className="file:hidden absolute bottom-4 left-4 text-sky-800 font-bold hover:cursor-pointer"
-            />
-          </label>
-
-          <button
-            type="submit"
-            className="p-2 px-3 rounded mt-4 text-white font-semibold bg-emerald-500 hover:bg-emerald-600 transition-colors"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <div className="animate-spin w-5 h-5 m-auto">
-                <svg
-                  className="w-full h-full"
-                  viewBox="0 0 256 256"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fill="currentColor"
-                    d="M140 32v32a12 12 0 0 1-24 0V32a12 12 0 0 1 24 0Zm33.3 62.7a11.6 11.6 0 0 0 8.4-3.5l22.7-22.6a12 12 0 1 0-17-17l-22.6 22.7a11.9 11.9 0 0 0 0 16.9a11.6 11.6 0 0 0 8.5 3.5ZM224 116h-32a12 12 0 0 0 0 24h32a12 12 0 0 0 0-24Zm-42.3 48.8a12 12 0 0 0-16.9 16.9l22.6 22.7a12 12 0 0 0 8.5 3.5a12.2 12.2 0 0 0 8.5-3.5a12 12 0 0 0 0-17ZM128 180a12 12 0 0 0-12 12v32a12 12 0 0 0 24 0v-32a12 12 0 0 0-12-12Zm-53.7-15.2l-22.7 22.6a12 12 0 0 0 0 17a12.2 12.2 0 0 0 8.5 3.5a12 12 0 0 0 8.5-3.5l22.6-22.7a12 12 0 0 0-16.9-16.9ZM76 128a12 12 0 0 0-12-12H32a12 12 0 0 0 0 24h32a12 12 0 0 0 12-12Zm-7.4-76.4a12 12 0 1 0-17 17l22.7 22.6a12 12 0 0 0 16.9 0a11.9 11.9 0 0 0 0-16.9Z"
-                  />
-                </svg>
-              </div>
-            ) : (
-              "Submit"
-            )}
-          </button>
-        </form>
-
-        {addItem.isError && (
-          <p className="font-medium text-red-600 max-w-lg">
-            Error: {addItem.error.message}
-          </p>
-        )}
+        <UploadForm />
 
         <Link href="/admin/dibsed">
           <a className="flex font-medium text-emerald-500 items-center hover:bg-emerald-100 h-14 w-full max-w-xs justify-center rounded transition-colors">
@@ -239,8 +84,6 @@ const Admin = (props: Props) => {
           </a>
         </Link>
       </div>
-
-      <SuccessfulToast show={isSuccessful} />
     </>
   );
 };
