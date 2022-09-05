@@ -1,3 +1,9 @@
+@import url("./Satoshi/Fonts/WEB/css/satoshi.css");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+* {
+  font-family: "Satoshi", sans-serif;
+}

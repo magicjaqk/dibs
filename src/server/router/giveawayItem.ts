@@ -25,6 +25,15 @@ export const giveawayItemRouter = createRouter()
       });
     },
   })
+  .query("getAvailable", {
+    async resolve({ ctx }) {
+      return await ctx.prisma.giveawayItem.findMany({
+        where: {
+          dibsByUser: null,
+        },
+      });
+    },
+  })
   .query("getDibsed", {
     async resolve({ ctx }) {
       return await ctx.prisma.giveawayItem.findMany({

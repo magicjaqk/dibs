@@ -1,112 +1,116 @@
-import clsx from "clsx";
-import { useSession } from "next-auth/react";
-import Image from "next/image";
+import { a, useTransition } from "@react-spring/web";
 import React from "react";
+import GiveAwayItemCard from "../components/stuff/GiveawayItemCard";
 import { trpc } from "../utils/trpc";
 
 type Props = {};
 
-const GiveAwayItemCard = ({ id }: { id: string }) => {
-  const item = trpc.useQuery(["giveawayItem.get", { itemId: id }]);
-  const { data: session, status } = useSession();
-
-  const dibsMutation = trpc.useMutation(["giveawayItem.dibs"], {
-    onSuccess: () => {
-      item.refetch();
-    },
-  });
-  const undibsMutation = trpc.useMutation(["giveawayItem.undibs"], {
-    onSuccess: () => {
-      item.refetch();
-    },
-  });
-
-  const btnClasses = clsx([
-    {
-      "opacity-50": item.data?.dibsByUserEmail,
-      "disabled:hover:cursor-not-allowed":
-        (item.data?.dibsByUserEmail !== null &&
-          session?.user?.email !== item.data?.dibsByUserEmail) ||
-        !session?.user?.email,
-      "hover:bg-gradient-to-r hover:from-emerald-500 hover:to-sky-500":
-        (item.data?.dibsByUserEmail !== null &&
-          session?.user?.email === item.data?.dibsByUserEmail) ||
-        (item.data?.dibsByUserEmail === null && session?.user?.email),
-    },
-    "bg-gradient-to-r from-sky-500 to-sky-500 rounded w-full h-16 text-white font-bold transition-colors",
-  ]);
-
-  if (!item.data) return <div>Loading...</div>;
-
-  return (
-    <div className="p-2 rounded-md m-4 bg-slate-200 w-full max-w-lg">
-      <h3 className="font-medium text-xl">{item.data.name}</h3>
-      <Image
-        src={item.data.image}
-        alt={`Image of ${item.data.name}`}
-        height={300}
-        width={400}
-        className="w-full"
-      />
-      <button
-        className={btnClasses}
-        onClick={() => {
-          if (item.data?.dibsByUserEmail) {
-            if (session?.user?.email === item.data.dibsByUserEmail)
-              undibsMutation.mutate({ id: item.data.id });
-          } else if (item.data?.id) {
-            dibsMutation.mutate({ id: item.data.id });
-          }
-        }}
-        disabled={
-          (item.data?.dibsByUserEmail !== null &&
-            session?.user?.email !== item.data.dibsByUserEmail) ||
-          !session?.user?.email
-        }
-      >
-        {dibsMutation.isLoading || undibsMutation.isLoading ? (
-          <div className="animate-spin w-5 h-5 m-auto">
-            <svg
-              className="w-full h-full"
-              viewBox="0 0 256 256"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fill="currentColor"
-                d="M140 32v32a12 12 0 0 1-24 0V32a12 12 0 0 1 24 0Zm33.3 62.7a11.6 11.6 0 0 0 8.4-3.5l22.7-22.6a12 12 0 1 0-17-17l-22.6 22.7a11.9 11.9 0 0 0 0 16.9a11.6 11.6 0 0 0 8.5 3.5ZM224 116h-32a12 12 0 0 0 0 24h32a12 12 0 0 0 0-24Zm-42.3 48.8a12 12 0 0 0-16.9 16.9l22.6 22.7a12 12 0 0 0 8.5 3.5a12.2 12.2 0 0 0 8.5-3.5a12 12 0 0 0 0-17ZM128 180a12 12 0 0 0-12 12v32a12 12 0 0 0 24 0v-32a12 12 0 0 0-12-12Zm-53.7-15.2l-22.7 22.6a12 12 0 0 0 0 17a12.2 12.2 0 0 0 8.5 3.5a12 12 0 0 0 8.5-3.5l22.6-22.7a12 12 0 0 0-16.9-16.9ZM76 128a12 12 0 0 0-12-12H32a12 12 0 0 0 0 24h32a12 12 0 0 0 12-12Zm-7.4-76.4a12 12 0 1 0-17 17l22.7 22.6a12 12 0 0 0 16.9 0a11.9 11.9 0 0 0 0-16.9Z"
-              />
-            </svg>
-          </div>
-        ) : item.data.dibsByUserEmail ? (
-          session?.user?.email === item.data.dibsByUserEmail ? (
-            "Undibs"
-          ) : (
-            "Dibsed"
-          )
-        ) : (
-          "Dibs"
-        )}
-      </button>
-    </div>
-  );
-};
-
 const StuffPage = (props: Props) => {
-  const items = trpc.useQuery(["giveawayItem.getAll"]);
+  const [showAvailable, setShowAvailable] = React.useState(true);
 
-  if (!items.data && !items.error) {
-    return <div>Loading...</div>;
-  }
+  const availableItems = trpc.useQuery(["giveawayItem.getAvailable"]);
+  const dibsedItems = trpc.useQuery(["giveawayItem.getDibsed"]);
+
+  const pageTransitions = useTransition(showAvailable, {
+    initial: {
+      opacity: 0,
+      x: "0vh",
+    },
+    from: {
+      opacity: 0,
+      x: showAvailable ? "-100vh" : "100vh",
+    },
+    enter: {
+      opacity: 1,
+      x: "0vh",
+    },
+    leave: {
+      opacity: 0,
+      position: "absolute",
+      x: showAvailable ? "100vh" : "-100vh",
+    },
+    reverse: showAvailable,
+  });
 
   return (
-    <div>
-      <h1 className="font-bold text-4xl">Call dibs on stuff below</h1>
-      <div className="flex flex-wrap">
-        {items.data?.map((item) => {
-          return <GiveAwayItemCard key={item.id} id={item.id} />;
-        })}
+    <>
+      <div className="flex flex-col items-center justify-start space-y-4 max-w-lg mx-auto overflow-x-hidden">
+        {/* Header */}
+        <div className="border-b border-[#D0D1D4] h-[117.5px] flex w-full items-end justify-between pb-[14.5px] text-[#1F1F1F] text-lg leading-[24px] font-bold px-9">
+          <button
+            onClick={() => setShowAvailable(true)}
+            className="px-[18px] py-[9px] bg-[#EAEAEA] rounded-[13px] hover:bg-[#8DCDFA] transition-colors"
+          >
+            Unclaimed Dibs
+          </button>
+          <button
+            onClick={() => setShowAvailable(false)}
+            className="px-[28px] py-[9px] bg-[#EAEAEA] rounded-[13px] hover:bg-[#8DCDFA] transition-colors"
+          >
+            My Dibs
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="relative w-full">
+          {pageTransitions((style, showAvailable) =>
+            showAvailable ? (
+              <a.div
+                style={style}
+                className="flex flex-col items-center pt-2 w-full"
+              >
+                {!availableItems.data &&
+                !availableItems.error &&
+                availableItems.isLoading ? (
+                  "Loading..."
+                ) : (
+                  <>
+                    {availableItems.data?.map((item) => {
+                      return (
+                        <GiveAwayItemCard
+                          key={item.id}
+                          id={item.id}
+                          name={item.name}
+                          images={item.images}
+                          description={item.description}
+                          refetchList={() => availableItems.refetch()}
+                        />
+                      );
+                    })}
+                  </>
+                )}
+              </a.div>
+            ) : (
+              <a.div
+                style={style}
+                className="flex flex-col items-center pt-2 w-full"
+              >
+                {!dibsedItems.data &&
+                !dibsedItems.error &&
+                dibsedItems.isLoading ? (
+                  "Loading..."
+                ) : (
+                  <>
+                    {dibsedItems.data?.map((item) => {
+                      return (
+                        <GiveAwayItemCard
+                          key={item.id}
+                          id={item.id}
+                          name={item.name}
+                          images={item.images}
+                          description={item.description}
+                          refetchList={() => dibsedItems.refetch()}
+                        />
+                      );
+                    })}
+                  </>
+                )}
+              </a.div>
+            )
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

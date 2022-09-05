@@ -4,11 +4,10 @@ import { useMove } from "@use-gesture/react";
 import useMeasure from "react-use-measure";
 import React from "react";
 
-type Props = {
-  animationComplete: boolean;
-};
+type Props = {};
 
 const SignInButton = (props: Props) => {
+  const [show, setShow] = React.useState(false);
   const { status } = useSession();
   const [ref, { width, height, x, y }] = useMeasure();
 
@@ -20,7 +19,7 @@ const SignInButton = (props: Props) => {
     config: config.stiff,
   }));
 
-  const transition = useTransition(props.animationComplete, {
+  const transition = useTransition(show, {
     from: {
       opacity: 0,
     },
@@ -59,7 +58,7 @@ const SignInButton = (props: Props) => {
     });
   };
 
-  if (!props.animationComplete) return null;
+  React.useEffect(() => setShow(true), []);
 
   return transition(
     (style, item) =>
@@ -70,7 +69,7 @@ const SignInButton = (props: Props) => {
           style={{ ...buttonSpring, ...style }}
           onClick={handleClick}
           onMouseLeave={() => api.start({ x: 0, y: 0 })}
-          className="w-full h-full rounded-full text-white font-bold bg-emerald-500 text-lg"
+          className="uppercase bg-chartreuse text-[#1C2031] rounded-[20px] shadow shadow-[#00000029] w-[208px] h-[64px] font-black text-[21px] tracking-[0.9px] leading-7 mt-11"
         >
           {buttonText}
         </a.button>
