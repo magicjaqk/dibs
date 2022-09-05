@@ -28,8 +28,12 @@ const GiveAwayItemCard = (props: Props) => {
   const [ref, { width }] = useMeasure();
 
   const item = trpc.useQuery(["giveawayItem.get", { itemId: props.id }]);
-  const { mutate: dibs } = trpc.useMutation(["giveawayItem.dibs"]);
-  const { mutate: undibs } = trpc.useMutation(["giveawayItem.undibs"]);
+  const { mutate: dibs, isLoading: dibsLoading } = trpc.useMutation([
+    "giveawayItem.dibs",
+  ]);
+  const { mutate: undibs, isLoading: undibsLoading } = trpc.useMutation([
+    "giveawayItem.undibs",
+  ]);
 
   const handleDibs = () => {
     if (!item.data?.dibsByUserEmail) {
@@ -60,7 +64,9 @@ const GiveAwayItemCard = (props: Props) => {
   };
 
   const dibsText = () => {
-    if (isDibsed) {
+    if (dibsLoading || undibsLoading) {
+      return "Loading...";
+    } else if (isDibsed) {
       return "Undo Dibs";
     } else {
       return "Call Dibs";
@@ -218,9 +224,10 @@ const GiveAwayItemCard = (props: Props) => {
 
       <button
         onClick={handleDibs}
-        className={`w-full rounded-[13px] shadow-lg ${
-          isDibsed ? "bg-[#EAEAEA]" : "bg-chartreuse"
-        } font-bold p-2 text-[#1C2031] uppercase text-lg h-12 transition-colors`}
+        className={`w-full rounded-[13px] ${
+          isDibsed ? "bg-[#EAEAEA]" : "bg-chartreuse shadow-lg"
+        } font-bold p-2 text-[#1C2031] uppercase text-lg h-12 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
+        disabled={dibsLoading || undibsLoading || item.isLoading}
       >
         {dibsText()}
       </button>

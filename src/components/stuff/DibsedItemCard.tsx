@@ -114,7 +114,7 @@ const DibsedItemCard = (props: Props) => {
 
           <button
             onClick={handleDibs}
-            className="w-full rounded-[13px] shadow-md shadow-[#00000029] bg-[#EAEAEA] font-bold p-2 text-[#1C2031] uppercase text-lg h-12"
+            className="w-full rounded-[13px] bg-[#EAEAEA] font-bold p-2 text-[#1C2031] uppercase text-lg h-12"
           >
             Undo Dibs
           </button>
