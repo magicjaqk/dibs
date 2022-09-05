@@ -132,12 +132,12 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Dibs</title>
+        <title>Dibs!</title>
         <meta
           name="description"
           content="Call dibs on things that Andrew and Mayra are getting rid of."
         />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/hand.png" />
       </Head>
 
       <div className="w-screen min-h-screen flex flex-col justify-center items-center overflow-x-hidden relative bg-[#1C2031] p-4">

@@ -1,4 +1,5 @@
 import { a, useTransition } from "@react-spring/web";
+import Head from "next/head";
 import Link from "next/link";
 import React from "react";
 import AvailableItems from "../components/stuff/AvailableItems";
@@ -43,6 +44,14 @@ const StuffPage = (props: Props) => {
 
   return (
     <>
+      <Head>
+        <title>Stuff!</title>
+        <meta
+          name="description"
+          content="Call dibs on things that Andrew and Mayra are getting rid of."
+        />
+        <link rel="icon" href="/hand.png" />
+      </Head>
       <div className="flex flex-col items-center justify-start space-y-4 max-w-lg mx-auto overflow-x-hidden">
         {/* Header */}
         <div className="border-b border-[#D0D1D4] h-[117.5px] flex w-full items-end justify-between pb-[14.5px] text-[#1F1F1F] text-lg leading-[24px] font-bold px-9">
