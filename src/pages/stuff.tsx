@@ -39,13 +39,17 @@ const StuffPage = (props: Props) => {
         <div className="border-b border-[#D0D1D4] h-[117.5px] flex w-full items-end justify-between pb-[14.5px] text-[#1F1F1F] text-lg leading-[24px] font-bold px-9">
           <button
             onClick={() => setShowAvailable(true)}
-            className="px-[18px] py-[9px] bg-[#EAEAEA] rounded-[13px] hover:bg-[#8DCDFA] transition-colors"
+            className={`px-[18px] py-[9px] ${
+              showAvailable ? "bg-[#8DCDFA]" : "bg-[#EAEAEA]"
+            } rounded-[13px] hover:bg-[#8DCDFA] transition-colors`}
           >
             Unclaimed Dibs
           </button>
           <button
             onClick={() => setShowAvailable(false)}
-            className="px-[28px] py-[9px] bg-[#EAEAEA] rounded-[13px] hover:bg-[#8DCDFA] transition-colors"
+            className={`px-[28px] py-[9px] ${
+              !showAvailable ? "bg-[#8DCDFA]" : "bg-[#EAEAEA]"
+            } rounded-[13px] hover:bg-[#8DCDFA] transition-colors`}
           >
             My Dibs
           </button>
