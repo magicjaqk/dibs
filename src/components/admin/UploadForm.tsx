@@ -49,7 +49,17 @@ const UploadForm = (props: Props) => {
     }
 
     for (let i = 0; i < files.length; i++) {
-      let file = files[i];
+      let file = files[i] as File;
+
+      // if filesize is greater than 1.5mb
+      if (file.size > 1024 * 1000 * 1.5) {
+        // Don't allow upload.
+        window.alert(
+          `File: ${file.name} is too large. Files must be smaller than 1.5mb.`
+        );
+        setIsLoading(false);
+        return null;
+      }
 
       if (!file) break;
 
