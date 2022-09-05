@@ -3,6 +3,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { useMove } from "@use-gesture/react";
 import useMeasure from "react-use-measure";
 import React from "react";
+import { useRouter } from "next/router";
 
 type Props = {};
 
@@ -10,6 +11,8 @@ const SignInButton = (props: Props) => {
   const [show, setShow] = React.useState(false);
   const { status } = useSession();
   const [ref, { width, height, x, y }] = useMeasure();
+
+  const router = useRouter();
 
   const [buttonSpring, api] = useSpring(() => ({
     from: {
@@ -42,7 +45,7 @@ const SignInButton = (props: Props) => {
       case "loading":
         return "Loading...";
       case "authenticated":
-        return "Sign Out";
+        return "See Stuff";
       default:
         return "Loading...";
     }
@@ -50,7 +53,8 @@ const SignInButton = (props: Props) => {
 
   const handleClick = () => {
     if (status === "authenticated") {
-      signOut();
+      router.push("/stuff");
+      return;
     }
 
     signIn("google", {

@@ -1,22 +1,31 @@
 import { useScroll } from "@use-gesture/react";
 import { useSession } from "next-auth/react";
+import {
+  a,
+  config,
+  useChain,
+  useSpring,
+  useSpringRef,
+  useTransition,
+} from "@react-spring/web";
 import Image from "next/image";
 import React from "react";
 import useMeasure from "react-use-measure";
 import { trpc } from "../../utils/trpc";
+import HandSVG from "../../assets/hand-svg.svg";
 
 type Props = {
   id: string;
   name: string;
   images: string[];
   description: string;
-  refetchList: () => void;
 };
 
 const GiveAwayItemCard = (props: Props) => {
   const [currentImg, setCurrentImg] = React.useState(0);
+  const [isDibsed, setIsDibsed] = React.useState(false);
+
   const [ref, { width }] = useMeasure();
-  const session = useSession();
 
   const item = trpc.useQuery(["giveawayItem.get", { itemId: props.id }]);
   const { mutate: dibs } = trpc.useMutation(["giveawayItem.dibs"]);
@@ -24,35 +33,37 @@ const GiveAwayItemCard = (props: Props) => {
 
   const handleDibs = () => {
     if (!item.data?.dibsByUserEmail) {
+      setIsDibsed(true);
       dibs(
         { id: props.id },
         {
           onSuccess: () => item.refetch(),
-          onError: (e) => window.alert(e.message),
+          onError: (e) => {
+            window.alert(e.message);
+            setIsDibsed(false);
+          },
         }
       );
     } else {
+      setIsDibsed(false);
       undibs(
         { id: props.id },
         {
           onSuccess: () => item.refetch(),
-          onError: (e) => window.alert(e.message),
+          onError: (e) => {
+            window.alert(e.message);
+            setIsDibsed(true);
+          },
         }
       );
     }
-
-    props.refetchList();
   };
 
   const dibsText = () => {
-    if (item.isLoading && !item.data && !item.error) {
-      return "Loading...";
-    } else if (item.data?.dibsByUserEmail === session.data?.user?.email) {
-      return "undibs";
-    } else if (item.data?.dibsByUserEmail) {
-      return "dibsed";
+    if (isDibsed) {
+      return "Undo Dibs";
     } else {
-      return "call dibs";
+      return "Call Dibs";
     }
   };
 
@@ -60,17 +71,78 @@ const GiveAwayItemCard = (props: Props) => {
     setCurrentImg(Math.round(state.offset[0] / width));
   });
 
+  const overlayRef = useSpringRef();
+  const overlayTransition = useTransition(isDibsed, {
+    ref: overlayRef,
+    from: {
+      opacity: 0,
+    },
+    enter: {
+      opacity: 1,
+    },
+    leave: {
+      opacity: 0,
+    },
+    config: config.default,
+  });
+
+  const handSpringRef = useSpringRef();
+  const handTransition = useTransition(isDibsed, {
+    ref: handSpringRef,
+    from: {
+      x: 30,
+      y: 50,
+      opacity: 0,
+    },
+    enter: {
+      x: 0,
+      y: 0,
+      opacity: 1,
+    },
+    leave: {
+      x: -30,
+      y: -50,
+      opacity: 0,
+    },
+    config: { mass: 1.5, tension: 800, friction: 25 },
+  });
+
+  const dibsSpringRef = useSpringRef();
+  const dibsTransition = useTransition(isDibsed, {
+    ref: dibsSpringRef,
+    from: {
+      x: -100,
+      opacity: 0,
+    },
+    enter: {
+      x: 0,
+      opacity: 1,
+    },
+    leave: {
+      x: 100,
+      opacity: 0,
+    },
+    config: { mass: 1, tension: 800, friction: 40 },
+  });
+
+  useChain(
+    isDibsed
+      ? [overlayRef, dibsSpringRef, handSpringRef]
+      : [handSpringRef, dibsSpringRef, overlayRef],
+    isDibsed ? [0, 0.2, 0.35] : [0, 0.1, 0.2]
+  );
+
   return (
     <div className="w-full flex flex-col py-[30.5px] border-b px-9">
       {/* Title */}
       <h1 className="text-[22px] w-full font-black">{props.name}</h1>
 
       {/* Images */}
-      <div className="relative my-[20px]">
+      <div className="relative my-[20px] z-0 rounded-[6px] overflow-hidden">
         <div
           {...bindScroll()}
           ref={ref}
-          className="aspect-square w-full flex overflow-x-scroll snap-mandatory snap-x rounded-[6px] shadow-md shadow-[#00000029] relative"
+          className="aspect-square w-full flex overflow-x-scroll snap-mandatory snap-x shadow-md shadow-[#00000029] relative"
         >
           {props.images.map((image) => (
             <div
@@ -98,13 +170,57 @@ const GiveAwayItemCard = (props: Props) => {
             />
           ))}
         </div>
+
+        {/* Dibsed Overlay */}
+        {overlayTransition(
+          (style, showOverlay) =>
+            showOverlay && (
+              <a.div
+                style={style}
+                className="absolute z-50 inset-0 w-full h-full bg-[#1C2031]/75 flex flex-col items-center justify-center"
+              >
+                {handTransition(
+                  (handStyle, showHand) =>
+                    showHand && (
+                      <a.div
+                        style={handStyle}
+                        className="relative w-[90px] h-[104px]"
+                      >
+                        <Image
+                          src={HandSVG}
+                          alt="Dibs hand icon."
+                          layout="fill"
+                          objectFit="contain"
+                          // Flip image
+                          style={{ transform: "rotateY(180deg)" }}
+                        />
+                      </a.div>
+                    )
+                )}
+
+                {dibsTransition(
+                  (dibsStyle, showDibs) =>
+                    showDibs && (
+                      <a.p
+                        style={dibsStyle}
+                        className="lowercase font-black italic text-[41px] leading-[55px] text-white"
+                      >
+                        dibbed!
+                      </a.p>
+                    )
+                )}
+              </a.div>
+            )
+        )}
       </div>
 
       <p className="leading-[22px] mb-[20px]">{props.description}</p>
 
       <button
         onClick={handleDibs}
-        className="w-full rounded-[13px] shadow-lg bg-chartreuse font-bold p-2 text-[#1C2031] uppercase text-lg h-12"
+        className={`w-full rounded-[13px] shadow-lg ${
+          isDibsed ? "bg-[#EAEAEA]" : "bg-chartreuse"
+        } font-bold p-2 text-[#1C2031] uppercase text-lg h-12 transition-colors`}
       >
         {dibsText()}
       </button>

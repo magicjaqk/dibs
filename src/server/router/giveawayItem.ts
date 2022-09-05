@@ -57,6 +57,19 @@ export const giveawayItemRouter = createRouter()
     }
     return next();
   })
+  // Authenticated requests
+  .query("getUserDibsed", {
+    async resolve({ ctx }) {
+      return await ctx.prisma.giveawayItem.findMany({
+        where: {
+          dibsByUserEmail: ctx.session?.user?.email,
+        },
+        orderBy: {
+          dibsUpdatedAt: "desc",
+        },
+      });
+    },
+  })
   // MUTATIONS
   .mutation("add", {
     input: z.object({

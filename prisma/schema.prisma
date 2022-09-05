@@ -17,6 +17,7 @@ model GiveawayItem {
   description     String
   dibsByUserEmail String?
   dibsByUser      User?    @relation(fields: [dibsByUserEmail], references: [email])
+  dibsUpdatedAt   DateTime @updatedAt
 }
 
 // Necessary for Next auth

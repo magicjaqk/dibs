@@ -1,15 +1,13 @@
 import { a, useTransition } from "@react-spring/web";
 import React from "react";
-import GiveAwayItemCard from "../components/stuff/GiveawayItemCard";
-import { trpc } from "../utils/trpc";
+import AvailableItems from "../components/stuff/AvailableItems";
+import DibsedItems from "../components/stuff/DibsedItems";
 
 type Props = {};
 
 const StuffPage = (props: Props) => {
   const [showAvailable, setShowAvailable] = React.useState(true);
-
-  const availableItems = trpc.useQuery(["giveawayItem.getAvailable"]);
-  const dibsedItems = trpc.useQuery(["giveawayItem.getDibsed"]);
+  const [animating, setAnimating] = React.useState(false);
 
   const pageTransitions = useTransition(showAvailable, {
     initial: {
@@ -29,7 +27,9 @@ const StuffPage = (props: Props) => {
       position: "absolute",
       x: showAvailable ? "100vh" : "-100vh",
     },
-    reverse: showAvailable,
+    reverse: !showAvailable,
+    onStart: () => setAnimating(true),
+    onRest: () => setAnimating(false),
   });
 
   return (
@@ -38,18 +38,22 @@ const StuffPage = (props: Props) => {
         {/* Header */}
         <div className="border-b border-[#D0D1D4] h-[117.5px] flex w-full items-end justify-between pb-[14.5px] text-[#1F1F1F] text-lg leading-[24px] font-bold px-9">
           <button
-            onClick={() => setShowAvailable(true)}
+            onClick={() => {
+              if (!animating) setShowAvailable(true);
+            }}
             className={`px-[18px] py-[9px] ${
               showAvailable ? "bg-[#8DCDFA]" : "bg-[#EAEAEA]"
-            } rounded-[13px] hover:bg-[#8DCDFA] transition-colors`}
+            } rounded-[13px] transition-colors`}
           >
             Unclaimed Dibs
           </button>
           <button
-            onClick={() => setShowAvailable(false)}
+            onClick={() => {
+              if (!animating) setShowAvailable(false);
+            }}
             className={`px-[28px] py-[9px] ${
               !showAvailable ? "bg-[#8DCDFA]" : "bg-[#EAEAEA]"
-            } rounded-[13px] hover:bg-[#8DCDFA] transition-colors`}
+            } rounded-[13px] transition-colors`}
           >
             My Dibs
           </button>
@@ -63,52 +67,14 @@ const StuffPage = (props: Props) => {
                 style={style}
                 className="flex flex-col items-center pt-2 w-full"
               >
-                {!availableItems.data &&
-                !availableItems.error &&
-                availableItems.isLoading ? (
-                  "Loading..."
-                ) : (
-                  <>
-                    {availableItems.data?.map((item) => {
-                      return (
-                        <GiveAwayItemCard
-                          key={item.id}
-                          id={item.id}
-                          name={item.name}
-                          images={item.images}
-                          description={item.description}
-                          refetchList={() => availableItems.refetch()}
-                        />
-                      );
-                    })}
-                  </>
-                )}
+                <AvailableItems />
               </a.div>
             ) : (
               <a.div
                 style={style}
                 className="flex flex-col items-center pt-2 w-full"
               >
-                {!dibsedItems.data &&
-                !dibsedItems.error &&
-                dibsedItems.isLoading ? (
-                  "Loading..."
-                ) : (
-                  <>
-                    {dibsedItems.data?.map((item) => {
-                      return (
-                        <GiveAwayItemCard
-                          key={item.id}
-                          id={item.id}
-                          name={item.name}
-                          images={item.images}
-                          description={item.description}
-                          refetchList={() => dibsedItems.refetch()}
-                        />
-                      );
-                    })}
-                  </>
-                )}
+                <DibsedItems />
               </a.div>
             )
           )}
