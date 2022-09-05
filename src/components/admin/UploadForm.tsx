@@ -69,7 +69,13 @@ const UploadForm = (props: Props) => {
       const fileType = file.type.split("/")[1];
       console.log(fileType);
 
-      if (!fileType) return console.error("File has no type!");
+      if (!fileType || (fileType !== "jpeg" && fileType !== "png")) {
+        window.alert(
+          `File: ${file.name} is an invalid type. Please only upload PNG or JPEG files.`
+        );
+        setIsLoading(false);
+        return null;
+      }
 
       const {
         data: { randomID },
