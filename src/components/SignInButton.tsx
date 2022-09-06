@@ -22,14 +22,14 @@ const SignInButton = (props: Props) => {
     config: config.stiff,
   }));
 
-  const transition = useTransition(show, {
-    from: {
-      opacity: 0,
-    },
-    enter: {
-      opacity: 1,
-    },
-  });
+  // const transition = useTransition(show, {
+  //   from: {
+  //     opacity: 0,
+  //   },
+  //   enter: {
+  //     opacity: 1,
+  //   },
+  // });
 
   const bind = useMove((state) => {
     const xPercent = (state.xy[0] - x) / width - 0.5;
@@ -64,20 +64,24 @@ const SignInButton = (props: Props) => {
 
   React.useEffect(() => setShow(true), []);
 
-  return transition(
-    (style, item) =>
-      item && (
-        <a.button
-          ref={ref}
-          {...bind()}
-          style={{ ...buttonSpring, ...style }}
-          onClick={handleClick}
-          onMouseLeave={() => api.start({ x: 0, y: 0 })}
-          className="uppercase bg-chartreuse text-[#1C2031] rounded-[20px] shadow shadow-[#00000029] w-[208px] h-[64px] font-black text-[21px] tracking-[0.9px] leading-7 mt-11"
-        >
-          {buttonText}
-        </a.button>
-      )
+  // return transition(
+  //   (style, item) =>
+  //     item && (
+  //       <a.div style={style}>
+  return (
+    <a.button
+      ref={ref}
+      {...bind()}
+      style={buttonSpring}
+      onClick={handleClick}
+      onMouseLeave={() => api.start({ x: 0, y: 0 })}
+      disabled={status === "loading"}
+      className="uppercase bg-chartreuse text-[#1C2031] rounded-[20px] shadow shadow-[#00000029] w-[208px] h-[64px] font-black text-[21px] tracking-[0.9px] leading-7 mt-11 disabled:opacity-50"
+    >
+      {buttonText}
+    </a.button>
+    // </a.div>
+    // )
   );
 };
 
