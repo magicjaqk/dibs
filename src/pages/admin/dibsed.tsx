@@ -24,7 +24,7 @@ const DibsedPage = (props: Props) => {
   if (!user.data?.admin) return <div>403: Forbidden Request.</div>;
 
   return (
-    <div className="px-9 py-4 flex flex-col items-center">
+    <div className="px-9 py-4 flex flex-col items-center max-w-lg mx-auto">
       <div className="flex items-center justify-between w-full">
         <button
           className="bg-[#1C2031] p-2 rounded-[6px] text-white font-bold"
@@ -52,7 +52,7 @@ const DibsedPage = (props: Props) => {
               {item.name}
             </h3>
             <p
-              className="font-medium text-lg px-4 text-chartreuse/60"
+              className="font-medium text-lg px-4 text-chartreuse/60 hover:underline hover:cursor-pointer"
               onClick={() => setCurrentUserFilter(item.dibsByUser?.name)}
             >
               {item.dibsByUser?.name}

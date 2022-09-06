@@ -45,6 +45,9 @@ export const giveawayItemRouter = createRouter()
             dibsByUser: null,
           },
         },
+        orderBy: {
+          dibsUpdatedAt: "desc",
+        },
         include: {
           dibsByUser: true,
         },
