@@ -194,6 +194,20 @@ export const giveawayItemRouter = createRouter()
       id: z.string(),
     }),
     async resolve({ ctx, input }) {
+      // Check if dibsed by another user
+      const isDibsedAlready = await ctx.prisma.giveawayItem.findUnique({
+        where: {
+          id: input.id,
+        },
+      });
+      if (isDibsedAlready?.dibsByUserEmail !== null) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Sorry, this item has already been dibsed by another user.",
+        });
+      }
+
+      // If not dibsed by another user already, set the item dibsed by current user.
       return await ctx.prisma.giveawayItem.update({
         where: {
           id: input.id,
