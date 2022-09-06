@@ -131,7 +131,7 @@ const UploadForm = (props: Props) => {
     <>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-lg flex flex-col p-4"
+        className="w-full flex flex-col my-4 text-lg font-medium max-w-lg py-4"
       >
         <label htmlFor="name">What is this item?</label>
         <input
@@ -139,12 +139,12 @@ const UploadForm = (props: Props) => {
           type="text"
           id="name"
           placeholder="Moldy underwear, cocaine, day-old bread, etc."
-          className="border rounded p-1"
+          className="border rounded-[6px] p-2 text-[#1C2031]"
         />
 
-        <label htmlFor="photo" className="relative mt-4 group">
-          <div className="w-full h-64 rounded-3xl overflow-hidden bg-gradient-to-r from-emerald-600/50 to-sky-600/50 flex items-center justify-center hover:cursor-pointer relative">
-            <div className="group-hover:scale-110 group-active:scale-100 rounded-full bg-white w-40 h-12 font-bold text-sky-700 shadow-md flex items-center justify-center transition-all z-10">
+        <label htmlFor="photo" className="relative mt-4 group w-full">
+          <div className="w-full aspect-square rounded-[6px] overflow-hidden bg-[#EAEAEA]/60 flex items-center justify-center hover:cursor-pointer relative">
+            <div className="group-hover:scale-110 group-active:scale-100 rounded-full bg-white w-40 h-12 font-bold text-[#1C2031] shadow-md flex items-center justify-center transition-all z-10">
               {previewImgURLs ? "Change Photo" : "Upload a Photo"}
             </div>
 
@@ -180,7 +180,7 @@ const UploadForm = (props: Props) => {
               },
             })}
             id="photo"
-            className="file:hidden absolute bottom-4 left-4 text-sky-800 font-bold hover:cursor-pointer"
+            className="file:hidden absolute bottom-4 left-4 font-bold hover:cursor-pointer text-[#1C2031]"
           />
         </label>
 
@@ -188,7 +188,7 @@ const UploadForm = (props: Props) => {
           How would you describe this item?
         </label>
         <textarea
-          className="border rounded p-2"
+          className="border rounded-[6px] p-2 text-[#1C2031]"
           {...register("description")}
           id="description"
           placeholder="A large mound of steaming hot poop."
@@ -197,7 +197,7 @@ const UploadForm = (props: Props) => {
 
         <button
           type="submit"
-          className="p-2 px-3 rounded mt-4 text-white font-semibold bg-emerald-500 hover:bg-emerald-600 transition-colors"
+          className="p-2 px-3 w-full rounded-[6px] font-bold text-[#1C2031] mt-4 bg-chartreuse hover:scale-105 transition-all"
           disabled={isLoading}
         >
           {isLoading ? (

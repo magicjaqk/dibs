@@ -77,17 +77,11 @@ const AnimatedTitle = (props: Props) => {
   return (
     <div className="text-4xl sm:text-6xl font-bold flex space-x-2.5 sm:space-x-3">
       <a.h1 style={callSpring}>{props.wordArray[0]}</a.h1>
-      <a.h1
-        style={dibsSpring}
-        className="bg-gradient-to-r from-emerald-500 to-sky-500 bg-clip-text text-transparent font-extrabold"
-      >
+      <a.h1 style={dibsSpring} className="text-chartreuse font-extrabold">
         {props.wordArray[1]}
       </a.h1>
       <a.h1 style={onSpring}>{props.wordArray[2]}</a.h1>
-      <a.h1
-        style={stuffSpring}
-        className="bg-gradient-to-r from-emerald-500 to-sky-500 bg-clip-text text-transparent font-extrabold"
-      >
+      <a.h1 style={stuffSpring} className="text-chartreuse font-extrabold">
         {props.wordArray[3]}
       </a.h1>
     </div>
