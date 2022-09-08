@@ -126,9 +126,10 @@ export const giveawayItemRouter = createRouter()
   })
   .mutation("update", {
     input: z.object({
-      name: z.string(),
-      description: z.string(),
       id: z.string(),
+      name: z.optional(z.string()),
+      description: z.optional(z.string()),
+      receivedByDibser: z.optional(z.boolean()),
     }),
     async resolve({ ctx, input }) {
       const user = await ctx.prisma.user.findUnique({
@@ -149,10 +150,7 @@ export const giveawayItemRouter = createRouter()
         where: {
           id: input.id,
         },
-        data: {
-          name: input.name,
-          description: input.description,
-        },
+        data: { ...input },
       });
     },
   })
