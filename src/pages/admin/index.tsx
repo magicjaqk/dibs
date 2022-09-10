@@ -60,13 +60,13 @@ const Admin = (props: Props) => {
       </Head>
 
       <div className="w-screen min-h-screen flex flex-col justify-center items-center px-9 py-9 overflow-hidden relative bg-[#1C2031] text-white">
-        <AnimatedTitle wordArray={["Get", "Rid", "of", "Shit"]} />
+        <AnimatedTitle wordArray={["Get", "Rid", "of", "Stuff"]} />
 
         <UploadForm />
 
         <Link href="/admin/dibsed">
           <a className="flex font-medium text-chartreuse items-center hover:bg-chartreuse/20 h-14 w-full max-w-xs justify-center rounded transition-colors">
-            <p>Shit you are giving away</p>
+            <p>Stuff you are giving away</p>
             <svg
               className="aspect-square w-5 ml-2"
               viewBox="0 0 24 24"
