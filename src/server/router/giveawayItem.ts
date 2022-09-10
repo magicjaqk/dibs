@@ -126,8 +126,9 @@ export const giveawayItemRouter = createRouter()
   })
   .mutation("update", {
     input: z.object({
-      name: z.string(),
-      description: z.string(),
+      name: z.optional(z.string()),
+      description: z.optional(z.string()),
+      images: z.optional(z.array(z.string())),
       id: z.string(),
     }),
     async resolve({ ctx, input }) {
@@ -145,13 +146,29 @@ export const giveawayItemRouter = createRouter()
         });
       }
 
+      const getPublicURLS = async () => {
+        let urls: string[] = [];
+
+        input.images?.forEach(async (imageFilePath) => {
+          const {
+            data: { publicUrl: imagePublicURL },
+          } = await supabase.storage.from("images").getPublicUrl(imageFilePath);
+
+          urls.push(imagePublicURL);
+        });
+
+        return urls;
+      };
+
+      const imagePublicURLs = await getPublicURLS();
+
       return await ctx.prisma.giveawayItem.update({
         where: {
           id: input.id,
         },
         data: {
-          name: input.name,
-          description: input.description,
+          ...input,
+          images: imagePublicURLs,
         },
       });
     },
@@ -174,6 +191,16 @@ export const giveawayItemRouter = createRouter()
             "You are not permitted to perform this action. Please contact an admin to do this for you.",
         });
       }
+
+      const itemToDelete = await ctx.prisma.giveawayItem.findUnique({
+        where: { id: input.id },
+      });
+
+      // Delete supabase images
+
+      // FIXME: Finish parsing paths to remove and add the paths to the supabase.(...).remove() function.
+      const pathsToRemove = itemToDelete?.images.map((url) => {});
+      await supabase.storage.from("images").remove();
 
       return await ctx.prisma.giveawayItem
         .delete({
