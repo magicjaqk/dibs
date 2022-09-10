@@ -138,7 +138,7 @@ const UploadForm = (props: Props) => {
           {...register("name")}
           type="text"
           id="name"
-          placeholder="Moldy underwear, cocaine, day-old bread, etc."
+          placeholder="Week-old underwear, day-old babies, month-old bread, etc."
           className="border rounded-[6px] p-2 text-[#1C2031]"
         />
 
