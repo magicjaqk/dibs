@@ -10,6 +10,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const CopyItemLinkButton = (props: Props) => {
   const [isPressed, setIsPressed] = React.useState(false);
   const [isCopied, setIsCopied] = React.useState(false);
+  const [isAnimating, setIsAnimating] = React.useState(false);
 
   const asyncCopyStateHandler = async () => {
     setIsCopied(true);
@@ -17,16 +18,14 @@ const CopyItemLinkButton = (props: Props) => {
     setIsCopied(false);
   };
 
-  const handlePress = () => {
-    try {
-      if (navigator.clipboard.writeText)
-        navigator.clipboard.writeText(
-          process.env.NEXT_PUBLIC_NEXTAUTH_URL + "/item/" + props.idToCopy
-        );
-      else {
-        throw "No navigator.clipboard.writeText.";
-      }
+  const handlePress = async () => {
+    // Stop copying multiple times and doing weird stuff with the animation.
+    if (isAnimating) return;
 
+    try {
+      await navigator.clipboard.writeText(
+        process.env.NEXT_PUBLIC_NEXTAUTH_URL + "/item/" + props.idToCopy
+      );
       asyncCopyStateHandler();
     } catch (err) {
       window.alert(err);
@@ -56,6 +55,8 @@ const CopyItemLinkButton = (props: Props) => {
       opacity: 0,
       x: -10,
     },
+    onStart: () => setIsAnimating(true),
+    onRest: () => setIsAnimating(false),
     config: config.stiff,
   });
 
@@ -85,6 +86,7 @@ const CopyItemLinkButton = (props: Props) => {
           setIsPressed(false);
         }}
         className="relative text-gray-600 p-1 rounded-[3px]"
+        title={"Copy a link to this item"}
       >
         <svg
           className="w-5 aspect-square"
