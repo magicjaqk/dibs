@@ -126,10 +126,11 @@ export const giveawayItemRouter = createRouter()
   })
   .mutation("update", {
     input: z.object({
+      id: z.string(),
       name: z.optional(z.string()),
       description: z.optional(z.string()),
       images: z.optional(z.array(z.string())),
-      id: z.string(),
+      receivedByDibser: z.optional(z.boolean()),
     }),
     async resolve({ ctx, input }) {
       const user = await ctx.prisma.user.findUnique({

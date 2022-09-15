@@ -18,6 +18,8 @@ model GiveawayItem {
   dibsByUserEmail String?
   dibsByUser      User?    @relation(fields: [dibsByUserEmail], references: [email])
   dibsUpdatedAt   DateTime @updatedAt
+
+  receivedByDibser Boolean @default(false)
 }
 
 // Necessary for Next auth
