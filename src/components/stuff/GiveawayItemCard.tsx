@@ -13,6 +13,7 @@ import React from "react";
 import useMeasure from "react-use-measure";
 import { trpc } from "../../utils/trpc";
 import HandSVG from "../../assets/hand-svg.svg";
+import CopyItemLinkButton from "../CopyItemLinkButton";
 
 type Props = {
   id: string;
@@ -141,7 +142,11 @@ const GiveAwayItemCard = (props: Props) => {
   return (
     <div className="w-full flex flex-col py-[30.5px] border-b px-9">
       {/* Title */}
-      <h1 className="text-[22px] w-full font-black">{props.name}</h1>
+      <div className="w-full flex items-center justify-between">
+        <h1 className="text-[22px] w-full font-black">{props.name}</h1>
+
+        <CopyItemLinkButton idToCopy={props.id} />
+      </div>
 
       {/* Images */}
       <div className="relative my-[20px] z-0 rounded-[6px] overflow-hidden">

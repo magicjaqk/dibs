@@ -82,21 +82,7 @@ const StuffPage = (props: Props) => {
             <Link href="/admin">
               <a className="px-9 w-full">
                 <button className="bg-[#1C2031] w-full rounded-[6px] h-10 text-lg shadow-md font-bold text-white uppercase flex items-center justify-center">
-                  <p>Add more items</p>
-                  <svg
-                    className="aspect-square w-6 ml-1"
-                    viewBox="0 0 24 26"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="m21 12l-7-9v4.99L3 8v8h11v5l7-9Z"
-                    />
-                  </svg>
+                  Admin Panel
                 </button>
               </a>
             </Link>

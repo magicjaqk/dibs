@@ -9,6 +9,7 @@ module.exports = {
       },
       colors: {
         chartreuse: "#EBFE53",
+        "oxford-blue": "#0F172A",
       },
     },
   },
