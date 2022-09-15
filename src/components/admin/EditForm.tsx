@@ -1,7 +1,8 @@
-import axios from "axios";
 import Image from "next/image";
+import { useRouter } from "next/router";
 import React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
+import getRandomID from "../../utils/getRandomID";
 import { supabase } from "../../utils/supabase";
 import { trpc } from "../../utils/trpc";
 import SuccessfulToast from "../SuccessfulToast";
@@ -20,6 +21,8 @@ type Props = {
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const EditForm = (props: Props) => {
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
@@ -33,8 +36,10 @@ const EditForm = (props: Props) => {
       name: "",
     },
   });
+
   const itemToEdit = trpc.useQuery(["giveawayItem.get", { itemId: props.id }], {
     onSuccess: (data) => {
+      // Set the form data to the original values for editing.
       if (data) {
         setValue("name", data.name);
         setValue("description", data.description);
@@ -90,11 +95,9 @@ const EditForm = (props: Props) => {
         return null;
       }
 
-      const {
-        data: { randomID },
-      } = await axios.get("/api/randomId");
+      const randomID = await getRandomID();
 
-      const uniqueFileName = `${randomID as string}.${fileType}`;
+      const uniqueFileName = `${randomID}.${fileType}`;
 
       try {
         const { data: supabaseData, error: supabaseError } =
@@ -116,21 +119,7 @@ const EditForm = (props: Props) => {
       },
       {
         onSuccess: async () => {
-          // Reset form values
-          reset({
-            images: [],
-            name: "",
-            description: "",
-          });
-          setPreviewImgURLs([]);
-
-          // Stop loading state
-          setIsLoading(false);
-
-          // Show successful toast for 3 seconds
-          setIsSuccessful(true);
-          await sleep(3000);
-          setIsSuccessful(false);
+          router.push("/stuff");
         },
         onError: (err) => {
           setIsLoading(false);
@@ -198,6 +187,9 @@ const EditForm = (props: Props) => {
             className="file:hidden absolute bottom-4 left-4 font-bold hover:cursor-pointer text-[#1C2031]"
           />
         </label>
+        <p className="text-sm text-chartreuse/80 font-medium mt-1 text-center">
+          Warning: Editing the photos for an item replaces its current photos.
+        </p>
 
         <label className="mt-4" htmlFor="description">
           How would you describe this item?
@@ -212,7 +204,7 @@ const EditForm = (props: Props) => {
 
         <button
           type="submit"
-          className="p-2 px-3 w-full rounded-[6px] font-bold text-[#1C2031] mt-4 bg-chartreuse hover:scale-105 transition-all"
+          className="p-2 px-3 w-full rounded-[6px] font-bold text-[#1C2031] mt-4 bg-chartreuse hover:scale-105 disabled:hover:scale-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           disabled={isLoading}
         >
           {isLoading ? (

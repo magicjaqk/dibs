@@ -146,18 +146,44 @@ export const giveawayItemRouter = createRouter()
         });
       }
 
+      const currentItem = await ctx.prisma.giveawayItem.findUnique({
+        where: {
+          id: input.id,
+        },
+      });
+      if (!currentItem)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Item #${input.id} does not exist.`,
+        });
+
       const getPublicURLS = async () => {
-        let urls: string[] = [];
+        // If no images to update, return the current image paths.
+        if (!input.images || input.images.length <= 0)
+          return currentItem?.images;
+
+        // Otherwise, delete current supabase images
+        const pathsToRemove = currentItem.images.map((url) => {
+          const fileName = url.split("/").pop()!;
+          return fileName;
+        });
+        console.log("Removing:", pathsToRemove);
+        const { data, error } = await supabase.storage
+          .from("images")
+          .remove(pathsToRemove);
+
+        // Then, get the public urls for the new images and return them.
+        let publicURLs: string[] = [];
 
         input.images?.forEach(async (imageFilePath) => {
           const {
             data: { publicUrl: imagePublicURL },
           } = await supabase.storage.from("images").getPublicUrl(imageFilePath);
 
-          urls.push(imagePublicURL);
+          publicURLs.push(imagePublicURL);
         });
 
-        return urls;
+        return publicURLs;
       };
 
       const imagePublicURLs = await getPublicURLS();
@@ -196,27 +222,27 @@ export const giveawayItemRouter = createRouter()
         where: { id: input.id },
       });
 
-      // Delete supabase images
-
-      // FIXME: Finish parsing paths to remove and add the paths to the supabase.(...).remove() function.
-      const pathsToRemove = itemToDelete?.images.map((url) => {});
-      await supabase.storage.from("images").remove();
-
-      return await ctx.prisma.giveawayItem
-        .delete({
-          where: {
-            id: input.id,
-          },
-        })
-        .then(async (item) => {
-          for (const image in item.images) {
-            if (image.includes("/")) {
-              const imagePath = image.slice(image.indexOf("images"));
-
-              await supabase.storage.from("images").remove([imagePath]);
-            }
-          }
+      if (!itemToDelete)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Item #${input.id} not found.`,
         });
+
+      // Delete supabase images
+      const pathsToRemove = itemToDelete.images.map((url) => {
+        const fileName = url.split("/").pop()!;
+        return fileName;
+      });
+      console.log("Removing:", pathsToRemove);
+      const { data, error } = await supabase.storage
+        .from("images")
+        .remove(pathsToRemove);
+
+      return await ctx.prisma.giveawayItem.delete({
+        where: {
+          id: input.id,
+        },
+      });
     },
   })
   .mutation("dibs", {
