@@ -14,12 +14,14 @@ import useMeasure from "react-use-measure";
 import { trpc } from "../../utils/trpc";
 import HandSVG from "../../assets/hand-svg.svg";
 import CopyItemLinkButton from "../CopyItemLinkButton";
+import Link from "next/link";
 
 type Props = {
   id: string;
   name: string;
   images: string[];
   description: string;
+  isAdmin: boolean | undefined;
 };
 
 const GiveAwayItemCard = (props: Props) => {
@@ -145,7 +147,17 @@ const GiveAwayItemCard = (props: Props) => {
       <div className="w-full flex items-center justify-between">
         <h1 className="text-[22px] w-full font-black">{props.name}</h1>
 
-        <CopyItemLinkButton idToCopy={props.id} />
+        <div className="flex items-center">
+          <CopyItemLinkButton idToCopy={props.id} />
+
+          {props.isAdmin && (
+            <Link href={"/admin/edit/" + props.id}>
+              <a className="p-2 ml-2 text-white bg-oxford-blue rounded-[6px] font-bold uppercase text-xs">
+                Edit
+              </a>
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Images */}

@@ -97,7 +97,7 @@ const StuffPage = (props: Props) => {
                 style={style}
                 className="flex flex-col items-center pt-2 w-full"
               >
-                <AvailableItems />
+                <AvailableItems isAdmin={isAdmin} />
               </a.div>
             ) : (
               <a.div

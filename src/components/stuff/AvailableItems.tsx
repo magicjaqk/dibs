@@ -2,7 +2,9 @@ import React from "react";
 import { trpc } from "../../utils/trpc";
 import GiveAwayItemCard from "./GiveawayItemCard";
 
-type Props = {};
+type Props = {
+  isAdmin: boolean | undefined;
+};
 
 const AvailableItems = (props: Props) => {
   const availableItems = trpc.useQuery(["giveawayItem.getAvailable"]);
@@ -23,6 +25,7 @@ const AvailableItems = (props: Props) => {
                 name={item.name}
                 images={item.images}
                 description={item.description}
+                isAdmin={props.isAdmin}
               />
             );
           })}

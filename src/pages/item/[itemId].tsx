@@ -14,6 +14,7 @@ const IndividualItemPage = (props: Props) => {
     "giveawayItem.get",
     { itemId: itemId as string },
   ]);
+  const user = trpc.useQuery(["auth.getSession"]);
 
   if (isLoading && !data && !error) return <div>Loading...</div>;
 
@@ -24,6 +25,7 @@ const IndividualItemPage = (props: Props) => {
     data && (
       <div className="max-w-lg mx-auto relative">
         <GiveAwayItemCard
+          isAdmin={user.data?.admin}
           id={data?.id}
           name={data?.name}
           description={data?.description}

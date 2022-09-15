@@ -129,6 +129,7 @@ export const giveawayItemRouter = createRouter()
       id: z.string(),
       name: z.optional(z.string()),
       description: z.optional(z.string()),
+      images: z.optional(z.array(z.string())),
       receivedByDibser: z.optional(z.boolean()),
     }),
     async resolve({ ctx, input }) {
@@ -146,11 +147,56 @@ export const giveawayItemRouter = createRouter()
         });
       }
 
+      const currentItem = await ctx.prisma.giveawayItem.findUnique({
+        where: {
+          id: input.id,
+        },
+      });
+      if (!currentItem)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Item #${input.id} does not exist.`,
+        });
+
+      const getPublicURLS = async () => {
+        // If no images to update, return the current image paths.
+        if (!input.images || input.images.length <= 0)
+          return currentItem?.images;
+
+        // Otherwise, delete current supabase images
+        const pathsToRemove = currentItem.images.map((url) => {
+          const fileName = url.split("/").pop()!;
+          return fileName;
+        });
+        console.log("Removing:", pathsToRemove);
+        const { data, error } = await supabase.storage
+          .from("images")
+          .remove(pathsToRemove);
+
+        // Then, get the public urls for the new images and return them.
+        let publicURLs: string[] = [];
+
+        input.images?.forEach(async (imageFilePath) => {
+          const {
+            data: { publicUrl: imagePublicURL },
+          } = await supabase.storage.from("images").getPublicUrl(imageFilePath);
+
+          publicURLs.push(imagePublicURL);
+        });
+
+        return publicURLs;
+      };
+
+      const imagePublicURLs = await getPublicURLS();
+
       return await ctx.prisma.giveawayItem.update({
         where: {
           id: input.id,
         },
-        data: { ...input },
+        data: {
+          ...input,
+          images: imagePublicURLs,
+        },
       });
     },
   })
@@ -173,21 +219,31 @@ export const giveawayItemRouter = createRouter()
         });
       }
 
-      return await ctx.prisma.giveawayItem
-        .delete({
-          where: {
-            id: input.id,
-          },
-        })
-        .then(async (item) => {
-          for (const image in item.images) {
-            if (image.includes("/")) {
-              const imagePath = image.slice(image.indexOf("images"));
+      const itemToDelete = await ctx.prisma.giveawayItem.findUnique({
+        where: { id: input.id },
+      });
 
-              await supabase.storage.from("images").remove([imagePath]);
-            }
-          }
+      if (!itemToDelete)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `Item #${input.id} not found.`,
         });
+
+      // Delete supabase images
+      const pathsToRemove = itemToDelete.images.map((url) => {
+        const fileName = url.split("/").pop()!;
+        return fileName;
+      });
+      console.log("Removing:", pathsToRemove);
+      const { data, error } = await supabase.storage
+        .from("images")
+        .remove(pathsToRemove);
+
+      return await ctx.prisma.giveawayItem.delete({
+        where: {
+          id: input.id,
+        },
+      });
     },
   })
   .mutation("dibs", {
