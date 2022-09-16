@@ -16,27 +16,10 @@ const SignInButton = (props: Props) => {
 
   const [buttonSpring, api] = useSpring(() => ({
     from: {
-      y: 0,
-      x: 0,
+      scale: 1,
     },
-    config: config.stiff,
+    config: { mass: 1.5, tension: 800, friction: 30 },
   }));
-
-  // const transition = useTransition(show, {
-  //   from: {
-  //     opacity: 0,
-  //   },
-  //   enter: {
-  //     opacity: 1,
-  //   },
-  // });
-
-  const bind = useMove((state) => {
-    const xPercent = (state.xy[0] - x) / width - 0.5;
-    const yPercent = (state.xy[1] - y) / height - 0.5;
-
-    api.start({ x: xPercent * 35, y: yPercent * 20 });
-  });
 
   const buttonText = React.useMemo(() => {
     switch (status) {
@@ -64,24 +47,30 @@ const SignInButton = (props: Props) => {
 
   React.useEffect(() => setShow(true), []);
 
-  // return transition(
-  //   (style, item) =>
-  //     item && (
-  //       <a.div style={style}>
   return (
-    <a.button
-      ref={ref}
-      {...bind()}
-      style={buttonSpring}
-      onClick={handleClick}
-      onMouseLeave={() => api.start({ x: 0, y: 0 })}
-      disabled={status === "loading"}
-      className="uppercase bg-chartreuse text-[#1C2031] rounded-[20px] shadow shadow-[#00000029] w-[208px] h-[64px] font-black text-[21px] tracking-[0.9px] leading-7 mt-11 disabled:opacity-50"
-    >
-      {buttonText}
-    </a.button>
-    // </a.div>
-    // )
+    <>
+      <a.button
+        ref={ref}
+        style={buttonSpring}
+        onClick={handleClick}
+        onMouseEnter={() => api.start({ scale: 1.1 })}
+        onMouseLeave={() => api.start({ scale: 1 })}
+        onTouchStart={() => api.start({ scale: 0.9 })}
+        onTouchEnd={() => api.start({ scale: 1 })}
+        disabled={status === "loading"}
+        className="uppercase bg-chartreuse text-[#1C2031] rounded-[20px] shadow shadow-[#00000029] w-[208px] h-[64px] font-black text-[21px] tracking-[0.9px] leading-7 mt-11 disabled:opacity-50"
+      >
+        {buttonText}
+      </a.button>
+      {status === "authenticated" && (
+        <button
+          onClick={() => signOut()}
+          className="text-sm font-medium text-chartreuse/80 hover:underline uppercase mt-6"
+        >
+          Sign Out
+        </button>
+      )}
+    </>
   );
 };
 
