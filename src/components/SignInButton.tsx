@@ -8,7 +8,6 @@ import { useRouter } from "next/router";
 type Props = {};
 
 const SignInButton = (props: Props) => {
-  const [show, setShow] = React.useState(false);
   const { status } = useSession();
   const [ref, { width, height, x, y }] = useMeasure();
 
@@ -20,6 +19,15 @@ const SignInButton = (props: Props) => {
     },
     config: { mass: 1.5, tension: 800, friction: 30 },
   }));
+
+  const signOutButtonSpring = useSpring({
+    from: {
+      height: 0,
+    },
+    to: {
+      height: height,
+    },
+  });
 
   const buttonText = React.useMemo(() => {
     switch (status) {
@@ -45,12 +53,9 @@ const SignInButton = (props: Props) => {
     });
   };
 
-  React.useEffect(() => setShow(true), []);
-
   return (
     <>
       <a.button
-        ref={ref}
         style={buttonSpring}
         onClick={handleClick}
         onMouseEnter={() => api.start({ scale: 1.1 })}
@@ -63,12 +68,14 @@ const SignInButton = (props: Props) => {
         {buttonText}
       </a.button>
       {status === "authenticated" && (
-        <button
+        <a.button
+          ref={ref}
           onClick={() => signOut()}
+          style={signOutButtonSpring}
           className="text-sm font-medium text-chartreuse/80 hover:underline uppercase mt-6"
         >
           Sign Out
-        </button>
+        </a.button>
       )}
     </>
   );
