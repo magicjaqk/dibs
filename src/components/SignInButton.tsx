@@ -1,15 +1,12 @@
-import { a, config, useSpring, useTransition } from "@react-spring/web";
+import { a, useSpring, useTransition } from "@react-spring/web";
 import { signIn, signOut, useSession } from "next-auth/react";
-import { useMove } from "@use-gesture/react";
-import useMeasure from "react-use-measure";
 import React from "react";
 import { useRouter } from "next/router";
 
 type Props = {};
 
 const SignInButton = (props: Props) => {
-  const { status } = useSession();
-  const [ref, { width, height, x, y }] = useMeasure();
+  const { status, data } = useSession();
 
   const router = useRouter();
 
@@ -19,15 +16,6 @@ const SignInButton = (props: Props) => {
     },
     config: { mass: 1.5, tension: 800, friction: 30 },
   }));
-
-  const signOutButtonSpring = useSpring({
-    from: {
-      height: 0,
-    },
-    to: {
-      height: height,
-    },
-  });
 
   const buttonText = React.useMemo(() => {
     switch (status) {
@@ -67,11 +55,9 @@ const SignInButton = (props: Props) => {
       >
         {buttonText}
       </a.button>
-      {status === "authenticated" && (
+      {data?.user?.email && status === "authenticated" && (
         <a.button
-          ref={ref}
           onClick={() => signOut()}
-          style={signOutButtonSpring}
           className="text-sm font-medium text-chartreuse/80 hover:underline uppercase mt-6"
         >
           Sign Out
