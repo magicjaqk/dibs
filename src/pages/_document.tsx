@@ -27,7 +27,10 @@ class MyDocument extends Document {
 
           {/* <!-- Open Graph / Facebook --> */}
           <meta property="og:type" content="website" />
-          <meta property="og:url" content="https://dibs.jaqk.coffee/" />
+          <meta
+            property="og:url"
+            content="https://dibs.somethingabout.studio/"
+          />
           <meta property="og:title" content="Dibs!" />
           <meta
             property="og:description"
@@ -35,12 +38,15 @@ class MyDocument extends Document {
           />
           <meta
             property="og:image"
-            content="https://dibs.jaqk.coffee/meta-img.jpeg"
+            content="https://dibs.somethingabout.studio/meta-img.jpeg"
           />
 
           {/* <!-- Twitter --> */}
           <meta property="twitter:card" content="summary_large_image" />
-          <meta property="twitter:url" content="https://dibs.jaqk.coffee/" />
+          <meta
+            property="twitter:url"
+            content="https://dibs.somethingabout.studio/"
+          />
           <meta property="twitter:title" content="Dibs!" />
           <meta
             property="twitter:description"
@@ -48,7 +54,7 @@ class MyDocument extends Document {
           />
           <meta
             property="twitter:image"
-            content="https://dibs.jaqk.coffee/meta-img.jpeg"
+            content="https://dibs.somethingabout.studio/meta-img.jpeg"
           />
         </Head>
         <body>

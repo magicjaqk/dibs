@@ -1,3 +1,4 @@
+import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
@@ -22,23 +23,60 @@ const IndividualItemPage = (props: Props) => {
     return <div>Sorry this item has already been dibsed.</div>;
 
   return (
-    data && (
-      <div className="max-w-lg mx-auto relative">
-        <GiveAwayItemCard
-          isAdmin={user.data?.admin}
-          id={data?.id}
-          name={data?.name}
-          description={data?.description}
-          images={data?.images}
+    <>
+      <Head>
+        {/* <!-- Primary Meta Tags --> */}
+        <meta name="title" content="Dibs!" />
+        <meta
+          name="description"
+          content={`${data.name} has been listed on Dibs!`}
         />
 
-        <Link href="/stuff">
-          <a className="text-chartreuse bg-oxford-blue rounded-[6px] font-bold text-center flex items-center justify-center h-10 mx-9 my-10">
-            See more stuff!
-          </a>
-        </Link>
-      </div>
-    )
+        {/* <!-- Open Graph / Facebook --> */}
+        <meta property="og:type" content="website" />
+        <meta
+          property="og:url"
+          content={`https://dibs.somethingabout.studio/item/${itemId}`}
+        />
+        <meta property="og:title" content="Dibs!" />
+        <meta
+          property="og:description"
+          content={`${data.name} has been listed on Dibs!`}
+        />
+        <meta property="og:image" content={data.images[0]} />
+
+        {/* <!-- Twitter --> */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta
+          property="twitter:url"
+          content={`https://dibs.somethingabout.studio/item/${itemId}`}
+        />
+        <meta property="twitter:title" content="Dibs!" />
+        <meta
+          property="twitter:description"
+          content={`${data.name} has been listed on Dibs!`}
+        />
+        <meta property="twitter:image" content={data.images[0]} />
+      </Head>
+
+      {data && (
+        <div className="max-w-lg mx-auto relative">
+          <GiveAwayItemCard
+            isAdmin={user.data?.admin}
+            id={data?.id}
+            name={data?.name}
+            description={data?.description}
+            images={data?.images}
+          />
+
+          <Link href="/stuff">
+            <a className="text-chartreuse bg-oxford-blue rounded-[6px] font-bold text-center flex items-center justify-center h-10 mx-9 my-10">
+              See more stuff!
+            </a>
+          </Link>
+        </div>
+      )}
+    </>
   );
 };
 
