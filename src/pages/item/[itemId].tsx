@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
+import Loading from "../../components/Loading";
 import GiveAwayItemCard from "../../components/stuff/GiveawayItemCard";
 import { trpc } from "../../utils/trpc";
 
@@ -17,7 +18,7 @@ const IndividualItemPage = (props: Props) => {
   ]);
   const user = trpc.useQuery(["auth.getSession"]);
 
-  if (isLoading && !data && !error) return <div>Loading...</div>;
+  if (isLoading && !data && !error) return <Loading />;
 
   if (data?.dibsByUserEmail !== null)
     return <div>Sorry this item has already been dibsed.</div>;
