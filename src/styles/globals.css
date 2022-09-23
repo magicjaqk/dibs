@@ -5,5 +5,5 @@
 @tailwind utilities;
 
 * {
-  font-family: "Satoshi", sans-serif;
+  font-family: "Satoshi", sans-serif !important;
 }
